@@ -1,6 +1,6 @@
 ### global define ###
-define ['filters/filters'], (filters) ->
+define ['filters/filters'], (module) ->
   'use strict'
-  filters.filter 'reverse', [ () -> (text) ->
+  module.filter 'reverse', [ () -> (text) ->
     text.split('').reverse().join ''
   ]

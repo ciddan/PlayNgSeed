@@ -20,7 +20,7 @@ module.exports = (grunt) ->
         expand: true
         cwd:    './test'
         src:    ['**/*.coffee']
-        dest:   './test'
+        dest:   './temp/test'
         ext:    '.js'
 
     ###
@@ -71,11 +71,11 @@ module.exports = (grunt) ->
 
     clean:
       dev:
-        folder: './temp/*'
+        src: ['./temp/']
       prod:
-        folder: './dist/*'
+        src: ['./dist/*']
       play:
-        folder: '../public/*'
+        src: ['../public/*']
 
     copy:
       scripts:
@@ -84,6 +84,13 @@ module.exports = (grunt) ->
           cwd:    './app/scripts'
           src:    ['**/*.js']
           dest:   './temp/scripts'
+        ]
+      test:
+        files: [
+          expand: true
+          cwd:    './test'
+          src:    ['**/*.js']
+          dest:   './temp/test'
         ]
       play:
         files: [
@@ -116,7 +123,7 @@ module.exports = (grunt) ->
         tasks: ['less:dev']
       test:
         files: './test/**/*.coffee',
-        tasks: ['coffee', 'coffeelint'] #NOTE: add testacular task
+        tasks: ['test']
 
     ###
     # BIG ASS WARNING: Make sure to use the AngularJS injection annotations,
@@ -134,6 +141,7 @@ module.exports = (grunt) ->
           preserveLicenseComments:  false
 
   grunt.loadNpmTasks 'grunt-coffeelint'
+  grunt.loadNpmTasks 'grunt-testacular'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-less'
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -142,8 +150,14 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-imagemin'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
 
+  grunt.registerTask 'testacular', 'test struff', () ->
+    done = grunt.task.current.async()
+    require('child_process').exec 'testacular start --single-run', (err, stdout) ->
+      grunt.log.write stdout
+      done err
+
   grunt.registerTask 'default', ['coffeelint:app', 'clean:dev', 'coffee:app', 'less:dev']
   grunt.registerTask 'build', ['coffeelint:app', 'clean:dev', 'clean:prod', 'coffee:app', 'less:prod', 'copy:scripts', 'requirejs']
-  grunt.registerTask 'test', ['coffee', 'coffeelint']
+  grunt.registerTask 'test', ['coffeelint', 'clean:dev', 'coffee', 'copy:scripts', 'copy:test', 'testacular']
   grunt.registerTask 'play', ['coffeelint:app', 'clean', 'coffee:app', 'less:dev', 'copy:play']
   grunt.registerTask 'dev', ['coffee', 'coffeelint', 'less:dev', 'watch']

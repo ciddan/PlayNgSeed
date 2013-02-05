@@ -7,4 +7,4 @@ define [
   'filters/filters'
 ], (ng) ->
   'use strict'
-  ng.module('dmBuilder', ['controllers', 'directives', 'services', 'filters'])
+  ng.module('ngPlaySeed', ['controllers', 'directives', 'services', 'filters'])

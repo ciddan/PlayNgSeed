@@ -1,8 +1,8 @@
 ### global define ###
-define ['controllers/controllers'], (controllers) ->
+define ['controllers/controllers'], (module) ->
   'use strict'
 
-  controllers.controller 'MainCtrl', ($scope) ->
+  module.controller 'MainCtrl', ($scope) ->
     $scope.awesomeThings = [
       'HTML5 Boilerplate'
       'AngularJS'

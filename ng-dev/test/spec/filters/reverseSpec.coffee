@@ -4,7 +4,7 @@ define ['chai'], (chai) ->
   assert = chai.assert
 
   describe 'Filter: Reverse', () ->
-    beforeEach module 'dmBuilder'
+    beforeEach module 'ngPlaySeed'
 
     it 'should reverse any given string', inject ['reverseFilter', (reverse) ->
       testString = 'leakiM'

@@ -4,7 +4,7 @@ define ['chai'], (chai) ->
   assert = chai.assert
 
   describe 'Controller: MainCtrl', () ->
-    beforeEach module 'dmBuilder'
+    beforeEach module 'ngPlaySeed'
 
     MainCtrl = {}
     scope = {}

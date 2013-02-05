@@ -1,22 +1,20 @@
 require.config
-  baseUrl: '/base'
+  baseUrl: '/base/scripts'
   paths:
-    'angular'              : 'app/scripts/vendor/angular'
-    'angular-mocks'        : 'test/vendor/angular-mocks'
-    'controllers'          : 'app/scripts/controllers'
-    'filters'              : 'app/scripts/filters'
-    'chai'                 : 'app/components/chai/chai'
+    'angular'             : 'vendor/angular'
+    'angular-mocks'       : '../test/vendor/angular-mocks'
+    'chai'                : '../test/vendor/chai'
   shim:
-    'angular'              : exports: 'angular'
-    'angular-mocks'        : exports: 'angular-mocks', deps : ['angular']
+    'angular'             : exports: 'angular'
+    'angular-mocks'       : exports: 'angular-mocks', deps : ['angular']
 
 
 require [
   'angular-mocks'
-  'app/scripts/app'
+  'app'
   'controllers/main'
   'filters/reverse'
-  'test/spec/controllers/mainCtrlSpec'
-  'test/spec/filters/reverseSpec'
+  '../test/spec/controllers/mainCtrlSpec'
+  '../test/spec/filters/reverseSpec'
 ], () ->
   window.__testacular__.start()
