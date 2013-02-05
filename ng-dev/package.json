@@ -1,0 +1,21 @@
+{
+  "name": "DMBuilder",
+  "version": "0.1.0",
+  "src": ".",
+  "dist": "../public",
+  "dependencies": {
+    "grunt": "0.4.x",
+    "grunt-contrib-clean": "0.4.x",
+    "grunt-contrib-less": "0.5.x",
+    "grunt-contrib-copy": "0.4.x",
+    "grunt-contrib-watch": "0.2.x",
+    "grunt-contrib-coffee": "0.4.x",
+    "grunt-contrib-imagemin": "0.1.x",
+    "grunt-contrib-requirejs": "0.4.x",
+    "grunt-coffeelint": "0.0.x"
+  },
+  "devDependencies": {
+    "coffee-script": "1.4.x",
+    "testacular": "0.5.x"
+  }
+}
