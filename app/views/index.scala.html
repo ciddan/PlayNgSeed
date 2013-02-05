@@ -9,7 +9,12 @@
         <title></title>
         <meta name="description" content=""/>
         <meta name="viewport" content="width=device-width"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/main.css")">
+
+        @if(play.Play.application().isProd()) {
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/main.min.css")">
+        } else {
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/main.css")">
+        }
     </head>
     <body ng-cloak class="ng-cloak">
         <!--[if lt IE 8]>
@@ -22,6 +27,13 @@
         <![endif]-->
         <div class="container" ng-view></div>
 
-        @helper.requireJs(core = routes.Assets.at("scripts/vendor/require.js").url, module = routes.Assets.at("scripts/main").url)
+        @if(play.Play.application().isProd()) {
+            @routes.Assets.at("scripts/scripts.min.js")
+        } else {
+            @helper.requireJs(
+                core = routes.Assets.at("scripts/vendor/require.js").url,
+                module = routes.Assets.at("scripts/main").url
+            )
+        }
     </body>
 </html>

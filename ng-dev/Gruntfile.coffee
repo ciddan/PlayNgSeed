@@ -156,6 +156,12 @@ module.exports = (grunt) ->
         tasks: ['test']
 
     ###
+    template:
+      views:
+        files: './temp/views/': './app/views/**/*.template'
+    ###
+
+    ###
     # BIG ASS WARNING: Make sure to use the AngularJS injection annotations,
     # otherwise your code might not work once minified.
     ###
@@ -190,11 +196,11 @@ module.exports = (grunt) ->
     'coffeelint:app'
     'coffee:app'
     'less:dev'
-    'imagemin:dev'
   ]
 
   grunt.registerTask 'dev', [
     'default'
+    'imagemin:dev'
     'watch'
   ]
 
@@ -219,5 +225,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask 'play', [
     'build'
+    'default'
     'copy:play'
   ]
