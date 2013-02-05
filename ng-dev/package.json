@@ -8,7 +8,7 @@
     "grunt-contrib-copy": "0.4.x",
     "grunt-contrib-watch": "0.2.x",
     "grunt-contrib-coffee": "0.4.x",
-    "grunt-contrib-imagemin": "0.1.x",
+    "grunt-contrib-imagemin": "0.1.1rc8",
     "grunt-contrib-requirejs": "0.4.x",
     "grunt-testacular": "0.3.x",
     "grunt-coffeelint": "0.0.x"

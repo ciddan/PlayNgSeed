@@ -34,10 +34,10 @@ module.exports = (grunt) ->
       indentation:
         value: 2
         level: "error"
-      line_endings :
+      line_endings:
         value: "unix"
         level: "warn"
-      max_line_length :
+      max_line_length:
         value: 80
         level: "warn"
 
@@ -66,16 +66,34 @@ module.exports = (grunt) ->
           cwd:    './app/styles'
           src:    ['**/*.less', '!**/_*.less']
           dest:   './dist/styles'
-          ext:    '.css'
+          ext:    '.min.css'
+        ]
+
+    imagemin:
+      prod:
+        options:
+          optimizationLevel: 3,
+        files: [
+          expand: true
+          cwd:    './app/images'
+          src:    ['**/*.png', '**/_*.jpg']
+          dest:   './dist/images'
+        ]
+      dev:
+        options:
+          optimizationLevel: 0,
+        files: [
+          expand: true
+          cwd:    './app/images'
+          src:    ['**/*.png', '**/_*.jpg']
+          dest:   './temp/images'
         ]
 
     clean:
       dev:
         src: ['./temp/']
       prod:
-        src: ['./dist/*']
-      play:
-        src: ['../public/*']
+        src: ['./dist/']
 
     copy:
       scripts:
@@ -104,6 +122,18 @@ module.exports = (grunt) ->
             expand: true
             cwd:    './temp/styles'
             src:    ['**/*.css']
+            dest:   '../public/styles'
+          }
+          {
+            expand: true
+            cwd:    './dist/scripts'
+            src:    ['**/*min.js']
+            dest:   '../public/scripts'
+          }
+          {
+            expand: true
+            cwd:    './dist/styles'
+            src:    ['**/*min.css']
             dest:   '../public/styles'
           }
           {
@@ -150,14 +180,44 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-imagemin'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
 
-  grunt.registerTask 'testacular', 'test struff', () ->
+  grunt.registerTask 'testacular', 'start the testacular runner', () ->
     done = grunt.task.current.async()
     require('child_process').exec 'testacular start --single-run', (err, stdout) ->
       grunt.log.write stdout
       done err
 
-  grunt.registerTask 'default', ['coffeelint:app', 'clean:dev', 'coffee:app', 'less:dev']
-  grunt.registerTask 'build', ['coffeelint:app', 'clean:dev', 'clean:prod', 'coffee:app', 'less:prod', 'copy:scripts', 'requirejs']
-  grunt.registerTask 'test', ['coffeelint', 'clean:dev', 'coffee', 'copy:scripts', 'copy:test', 'testacular']
-  grunt.registerTask 'play', ['coffeelint:app', 'clean', 'coffee:app', 'less:dev', 'copy:play']
-  grunt.registerTask 'dev', ['coffee', 'coffeelint', 'less:dev', 'watch']
+  grunt.registerTask 'default', [
+    'coffeelint:app'
+    'coffee:app'
+    'less:dev'
+    'imagemin:dev'
+  ]
+
+  grunt.registerTask 'dev', [
+    'default'
+    'watch'
+  ]
+
+  grunt.registerTask 'test', [
+    'coffeelint'
+    'clean:dev'
+    'coffee'
+    'copy:scripts'
+    'copy:test'
+    'testacular'
+  ]
+
+  grunt.registerTask 'build', [
+    'coffeelint:app'
+    'clean'
+    'coffee:app'
+    'less:prod'
+    'imagemin:prod'
+    'copy:scripts'
+    'requirejs'
+  ]
+
+  grunt.registerTask 'play', [
+    'build'
+    'copy:play'
+  ]

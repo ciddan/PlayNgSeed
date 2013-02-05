@@ -4,6 +4,7 @@ project/target
 target
 tmp
 ym-ui/
+public/
 ng-dev/temp
 ng-dev/dist
 ng-dev/node_modules
