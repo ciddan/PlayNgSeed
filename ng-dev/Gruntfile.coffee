@@ -58,17 +58,22 @@ module.exports = (grunt) ->
           dest:   './temp/styles'
           ext:    '.css'
         ]
-      prod:
-        options:
-          yuicompress: true
-        files: [
-          expand: true
-          cwd:    './app/styles'
-          src:    ['**/*.less', '!**/_*.less']
-          dest:   './dist/styles'
-          ext:    '.min.css'
-        ]
 
+    ###
+    # NOTE: If you want, you can use the wildcard notation to catch all
+    # .css-files under temp/styles, but with css-concatenation the order
+    # of the files is more often than not important.
+    ###
+    mincss:
+      compress:
+        files: [
+            src:  ['./temp/styles/main.css', './temp/styles/greeter.css']
+            dest: './dist/styles/styles.min.css'
+          ]
+
+    ###
+    # Tries its best to minimize image file size without lossy compression
+    ###
     imagemin:
       prod:
         options:
@@ -89,6 +94,11 @@ module.exports = (grunt) ->
           dest:   './temp/images'
         ]
 
+    ###
+    # NOTE: Since play's public folder is outside of grunt cwd (ng-dev)
+    # it can't clean that directory. Just know that you might need to do
+    # that manually if you remove source files.
+    ###
     clean:
       dev:
         src: ['./temp/']
@@ -155,15 +165,24 @@ module.exports = (grunt) ->
         files: './test/**/*.coffee',
         tasks: ['test']
 
-    ###
     template:
-      views:
-        files: './temp/views/': './app/views/**/*.template'
-    ###
+      dev:
+        files: [
+          expand: true
+          cwd:    './app/templates'
+          src:    ['**/*.template']
+          dest:   './temp/templates'
+          ext:    '.html'
+        ],
+        options:
+          data:
+            env: 'dev'
+
 
     ###
     # BIG ASS WARNING: Make sure to use the AngularJS injection annotations,
-    # otherwise your code might not work once minified.
+    # otherwise your code might not work once minified. If you don't want
+    # to use the injection annotations, turn off uglification.
     ###
     requirejs:
       compile:
@@ -178,11 +197,14 @@ module.exports = (grunt) ->
 
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-testacular'
+  grunt.loadNpmTasks 'grunt-template-helper'
+
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-less'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
+  grunt.loadNpmTasks 'grunt-contrib-mincss'
   grunt.loadNpmTasks 'grunt-contrib-imagemin'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
 
@@ -195,7 +217,8 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', [
     'coffeelint:app'
     'coffee:app'
-    'less:dev'
+    'less'
+    'template:dev'
   ]
 
   grunt.registerTask 'dev', [
@@ -217,7 +240,8 @@ module.exports = (grunt) ->
     'coffeelint:app'
     'clean'
     'coffee:app'
-    'less:prod'
+    'less'
+    'mincss'
     'imagemin:prod'
     'copy:scripts'
     'requirejs'
