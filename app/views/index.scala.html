@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width"/>
 
         @if(play.Play.application().isProd()) {
-            <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/main.min.css")">
+            <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/styles.min.css")">
         } else {
             <link rel="stylesheet" media="screen" href="@routes.Assets.at("styles/main.css")">
         }
@@ -28,7 +28,10 @@
         <div class="container" ng-view></div>
 
         @if(play.Play.application().isProd()) {
-            @routes.Assets.at("scripts/scripts.min.js")
+            @helper.requireJs(
+                core = routes.Assets.at("scripts/vendor/require.js").url,
+                module = routes.Assets.at("scripts/scripts.min").url
+            )
         } else {
             @helper.requireJs(
                 core = routes.Assets.at("scripts/vendor/require.js").url,

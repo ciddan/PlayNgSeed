@@ -1,7 +1,26 @@
+'use strict'
+
+path = require 'path'
+lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet
+
+folderMount = (connect, point) ->
+  connect.static(path.resolve(point))
+
 module.exports = (grunt) ->
+  ngSeedConfig =
+    slipstream: true
 
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
+
+    ###
+    # Sets up the live reload server
+    ###
+    connect:
+      livereload:
+        options:
+          middleware: (connect, options) ->
+            [lrSnippet, folderMount(connect, "../public")]
 
     ###
     # Sets up CoffeeScript compilation.
@@ -120,50 +139,59 @@ module.exports = (grunt) ->
           src:    ['**/*.js']
           dest:   './temp/test'
         ]
-      play:
-        files: [
-          {
-            expand: true
-            cwd:    './temp/scripts'
-            src:    ['**/*.js']
-            dest:   '../public/scripts'
-          }
-          {
-            expand: true
-            cwd:    './temp/styles'
-            src:    ['**/*.css']
-            dest:   '../public/styles'
-          }
-          {
-            expand: true
-            cwd:    './dist/scripts'
-            src:    ['**/*min.js']
-            dest:   '../public/scripts'
-          }
-          {
-            expand: true
-            cwd:    './dist/styles'
-            src:    ['**/*min.css']
-            dest:   '../public/styles'
-          }
-          {
-            expand: true
-            cwd:    './temp/images'
-            src:    ['**/*.*']
-            dest:   '../public/images'
-          }
-        ]
+      playAll:
+        files: [{
+          expand: true
+          cwd:    './temp/'
+          src:    ['**/*.*']
+          dest:   '../public'
+        }, {
+          expand: true
+          cwd:    './dist/'
+          src:    ['**/*.*']
+          dest:   '../public'
+        }]
 
-    watch:
+    ###
+    # Monitor the file system and react to changes
+    # The temp and dist tasks sets up slipstreaming
+    # of changed files to play.
+    ###
+    regarde:
+      scripts:
+        files: './app/scripts/**/*.js'
+        tasks: ['copy:scripts']
       coffee:
         files: './app/scripts/**/*.coffee'
         tasks: ['coffeelint', 'coffee:app']
       less:
         files: './app/styles/**/*.less'
         tasks: ['less:dev']
+      imagemin:
+        files: [
+          expand: true
+          cwd:    './app/images'
+          src:    ['**/*.png', '**/_*.jpg']
+          dest:   './dist/images'
+        ]
+        tasks: ['imagemin:dev']
       test:
         files: './test/**/*.coffee',
         tasks: ['test']
+      template:
+        files: [
+          expand: true
+          cwd:    './app/templates'
+          src:    ['**/*.template']
+          dest:   './temp/templates'
+          ext:    '.html'
+        ]
+        tasks: ['template:dev']
+      temp:
+        files: './temp/**/*.*'
+        tasks: ['livereload']
+      dist:
+        files: './dist/**/*.*'
 
     template:
       dev:
@@ -173,7 +201,7 @@ module.exports = (grunt) ->
           src:    ['**/*.template']
           dest:   './temp/templates'
           ext:    '.html'
-        ],
+        ]
         options:
           data:
             env: 'dev'
@@ -195,6 +223,7 @@ module.exports = (grunt) ->
           out:                      './dist/scripts/scripts.min.js'
           preserveLicenseComments:  false
 
+  grunt.loadNpmTasks 'grunt-regarde'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-testacular'
   grunt.loadNpmTasks 'grunt-template-helper'
@@ -202,11 +231,13 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-less'
   grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-mincss'
   grunt.loadNpmTasks 'grunt-contrib-imagemin'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
+
+  grunt.loadNpmTasks 'grunt-contrib-connect'
+  grunt.loadNpmTasks 'grunt-contrib-livereload'
 
   grunt.registerTask 'testacular', 'start the testacular runner', () ->
     done = grunt.task.current.async()
@@ -222,9 +253,12 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'dev', [
+    'livereload-start'
+    'connect'
     'default'
     'imagemin:dev'
-    'watch'
+    'copy:playAll'
+    'regarde'
   ]
 
   grunt.registerTask 'test', [
@@ -242,6 +276,7 @@ module.exports = (grunt) ->
     'coffee:app'
     'less'
     'mincss'
+    'template'
     'imagemin:prod'
     'copy:scripts'
     'requirejs'
@@ -250,5 +285,21 @@ module.exports = (grunt) ->
   grunt.registerTask 'play', [
     'build'
     'default'
-    'copy:play'
+    'copy:playAll'
   ]
+
+  grunt.event.on 'regarde:file', (status, section, filepath) ->
+    return if not ngSeedConfig.slipstream
+    return if section isnt 'dist' and section isnt 'temp'
+    return if status is 'deleted'
+
+    dest = filepath.replace section,'../public'
+    slipcopy filepath, dest
+
+  slipcopy = (src, dest) ->
+    try
+      grunt.log.writeln "Copying #{src.cyan} -> #{dest.cyan}"
+      grunt.file.copy src, dest
+    catch e
+      grunt.log.error "Failed to copy file #{src.cyan} to play's public directory."
+      grunt.log.error e
