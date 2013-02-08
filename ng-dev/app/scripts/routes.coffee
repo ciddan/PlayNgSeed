@@ -5,14 +5,8 @@ define ['app'], (app) ->
   app.config ['$routeProvider', ($routeProvider) ->
     $routeProvider
     .when '/',
-      templateUrl: 'assets/views/main.html'
+      templateUrl: 'assets/templates/views/main.html'
       controller: 'MainCtrl'
-    .when '/project'
-      templateUrl: 'assets/views/project.html'
-      controller: 'ProjectCtrl'
-    .when '/project/:name'
-      templateUrl: 'assets/views/edit.html'
-      controller: 'EditCtrl'
     .otherwise
-      redirectTo: '/'
+      redirectTo: '/4'
   ]

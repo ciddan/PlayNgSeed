@@ -11,7 +11,5 @@ require [
   'app'
   'routes'
   'controllers/main'
-  'controllers/project'
-  'controllers/edit'
   'filters/reverse'
 ], (require) -> require ['bootstrap']
