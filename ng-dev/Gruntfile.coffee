@@ -20,7 +20,7 @@ module.exports = (grunt) ->
       livereload:
         options:
           middleware: (connect, options) ->
-            [lrSnippet, folderMount(connect, "../public")]
+            [lrSnippet, folderMount(connect, '../public')]
 
     ###
     # Sets up CoffeeScript compilation.
@@ -139,6 +139,20 @@ module.exports = (grunt) ->
           src:    ['**/*.js']
           dest:   './temp/test'
         ]
+      playDev:
+        files: [
+          expand: true
+          cwd:    './temp/'
+          src:    ['**/*.*']
+          dest:   '../public'
+        ]
+      playDist:
+        files: [
+          expand: true
+          cwd:    './dist/'
+          src:    ['**/*.*']
+          dest:   '../public'
+        ]
       playAll:
         files: [{
           expand: true
@@ -152,8 +166,9 @@ module.exports = (grunt) ->
           dest:   '../public'
         }]
 
+
     ###
-    # Monitor the file system and react to changes
+    # Monitor the file system and react to changes.
     # The temp and dist tasks sets up slipstreaming
     # of changed files to play.
     ###
@@ -205,7 +220,21 @@ module.exports = (grunt) ->
         options:
           data:
             env: 'dev'
-
+      prod:
+        files:
+          './dist/templates/templates.html': ['./app/templates/**/*.template']
+        options:
+          wrap:
+            banner: '<script type="text/ng-template" id="#{0}">\n'
+            footer: '\n</script>'
+            inject:[
+              prop: 'src'
+              repl:
+                "./app/": "assets/"
+                ".template": ".html"
+            ]
+          minify:
+            mode: 'html'
 
     ###
     # BIG ASS WARNING: Make sure to use the AngularJS injection annotations,
@@ -215,7 +244,8 @@ module.exports = (grunt) ->
     requirejs:
       compile:
         options:
-          name:                     'app'
+          name:                     'main'
+          include:                  ['bootstrap']
           baseUrl:                  './temp/scripts'
           mainConfigFile:           './temp/scripts/main.js'
           optimize:                 'uglify2'
@@ -235,7 +265,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-mincss'
   grunt.loadNpmTasks 'grunt-contrib-imagemin'
   grunt.loadNpmTasks 'grunt-contrib-requirejs'
-
   grunt.loadNpmTasks 'grunt-contrib-connect'
   grunt.loadNpmTasks 'grunt-contrib-livereload'
 
@@ -250,20 +279,20 @@ module.exports = (grunt) ->
     'coffee:app'
     'less'
     'template:dev'
+    'imagemin:dev'
   ]
 
   grunt.registerTask 'dev', [
     'livereload-start'
     'connect'
     'default'
-    'imagemin:dev'
-    'copy:playAll'
+    'copy:playDev'
     'regarde'
   ]
 
   grunt.registerTask 'test', [
-    'coffeelint'
     'clean:dev'
+    'coffeelint'
     'coffee'
     'copy:scripts'
     'copy:test'
@@ -271,21 +300,20 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'build', [
-    'coffeelint:app'
     'clean'
+    'coffeelint:app'
     'coffee:app'
     'less'
     'mincss'
-    'template'
+    'template:prod'
     'imagemin:prod'
     'copy:scripts'
     'requirejs'
   ]
 
-  grunt.registerTask 'play', [
+  grunt.registerTask 'dist', [
     'build'
-    'default'
-    'copy:playAll'
+    'copy:playDist'
   ]
 
   grunt.event.on 'regarde:file', (status, section, filepath) ->
