@@ -183,24 +183,13 @@ module.exports = (grunt) ->
         files: './app/styles/**/*.less'
         tasks: ['less:dev']
       imagemin:
-        files: [
-          expand: true
-          cwd:    './app/images'
-          src:    ['**/*.png', '**/_*.jpg']
-          dest:   './dist/images'
-        ]
+        files: ['./app/images/**/*.png', './app/images/**/*.jpg']
         tasks: ['imagemin:dev']
       test:
         files: './test/**/*.coffee',
         tasks: ['test']
       template:
-        files: [
-          expand: true
-          cwd:    './app/templates'
-          src:    ['**/*.template']
-          dest:   './temp/templates'
-          ext:    '.html'
-        ]
+        files: './app/templates/**/*.template'
         tasks: ['template:dev']
       temp:
         files: './temp/**/*.*'
